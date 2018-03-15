@@ -25,7 +25,7 @@ class qgismakeline:
 		fielddef = ogr.FieldDefn("MMSI", ogr.OFTString)
 		fielddef.SetWidth(10)
 		dstlayer.CreateField(fielddef)
-
+		
 		fielddef = ogr.FieldDefn("S_time", ogr.OFTString)
 		fielddef.SetWidth(80)
 		dstlayer.CreateField(fielddef)
@@ -35,7 +35,7 @@ class qgismakeline:
 		dstlayer.CreateField(fielddef)
 	
 		#-----------------
-		df = pd.read_csv('C:/Users/USER/Desktop/AISDATA/hualien.csv', sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
+		df = pd.read_csv('C:/Users/USER/Desktop/AISDATA/kaohsiung.csv', sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
 		MMSI = df['MMSI'].tolist()
 		Lon = df['Longitude'].tolist()
 		Lat= df['Latitude'].tolist()
@@ -45,23 +45,20 @@ class qgismakeline:
 			if not(MMSI is None):
 				
 				if (MMSI[0]!=mmsi):
-					#print('mmsi different')
 					#count the number of the repeat MMSI[0]
 					count = MMSI.count(MMSI[0])
-					#print('%s count = %s') %(MMSI[0],count)
-					#print('%s != %s') %(MMSI[0],mmsi)
-					
 					#make line
-					line = ogr.Geometry(ogr.wkbLineString)
-					for Long,Lati in zip(Lon[:count],Lat[:count]):
-						line.AddPoint(float(Long), float(Lati))
-					feature = ogr.Feature(dstlayer.GetLayerDefn())
-					feature.SetGeometry(line)
-					feature.SetField("MMSI", MMSI[0])
-					feature.SetField("S_time", Time[0])
-					feature.SetField("E_time", Time[count-1])
-					dstlayer.CreateFeature(feature)
-					
+					if (count>1):
+						line = ogr.Geometry(ogr.wkbLineString)
+						for Long,Lati in zip(Lon[:count],Lat[:count]):
+							line.AddPoint(float(Long), float(Lati))
+						feature = ogr.Feature(dstlayer.GetLayerDefn())
+						feature.SetGeometry(line)
+						feature.SetField("MMSI", MMSI[0])
+						feature.SetField("S_time", Time[0])
+						feature.SetField("E_time", Time[count-1])
+						dstlayer.CreateFeature(feature)
+						print('%s point count = %s') %(MMSI[0],count)
 					#remove the used feature
 					Lon = Lon[count:]
 					Lat = Lat[count:]
@@ -74,35 +71,33 @@ class qgismakeline:
 					t1 = datetime.datetime.strptime(front_time,'%Y-%m-%d %H:%M:%S')
 					#18000sec = 5hr
 					if((t2-t1).seconds>18000):
-						#print('t2-t1>18000')
 						index = Time.index(time)
 						#print(time)
 						#print('index = %s') %(index)
-						line = ogr.Geometry(ogr.wkbLineString)
-						for Long,Lati in zip(Lon[:index],Lat[:index]):
-							line.AddPoint(float(Long), float(Lati))
-						feature = ogr.Feature(dstlayer.GetLayerDefn())
-						feature.SetGeometry(line)
-						feature.SetField("MMSI", MMSI[0])
-						feature.SetField("S_time", Time[0])
-						feature.SetField("E_time", Time[index-1])
-						dstlayer.CreateFeature(feature)
-						
+						if(index>1):
+							line = ogr.Geometry(ogr.wkbLineString)
+							for Long,Lati in zip(Lon[:index],Lat[:index]):
+								line.AddPoint(float(Long), float(Lati))
+							feature = ogr.Feature(dstlayer.GetLayerDefn())
+							feature.SetGeometry(line)
+							feature.SetField("MMSI", MMSI[0])
+							feature.SetField("S_time", Time[0])
+							feature.SetField("E_time", Time[index-1])
+							dstlayer.CreateFeature(feature)
+							print('%s point count = %s') %(MMSI[0],index)
 						Lon = Lon[index:]
 						Lat = Lat[index:]
 						Time = Time[index:]
 						MMSI = MMSI[index:]
-				
+					
 				front_time = time
-
-		
+			else:
+				print('left MMSI = %s') %(MMSI)
 		
 		
 test = qgismakeline()
 test.select()
 print('----------finished---------')
-
-
 
 #np.savetmmsit('C:/Users/USER/Desktop/test.tmmsit', df.values, delimiter=",", fmt="%s")
 #np.savetmmsit('C:/Users/USER/Desktop/test.tmmsit', string, delimiter=",", fmt="%s")
