@@ -1,4 +1,4 @@
-# ship-tracking
+# ship-info
 This is a QGIS extension for converting AIS data to ship tracking.
 
 ## prerequisite
