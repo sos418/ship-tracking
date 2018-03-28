@@ -38,7 +38,7 @@ class qgismakeline:
 		dstlayer.CreateField(fielddef)
 		
 		#-----------------
-		date_format =''
+		
 		date_format_in = input('date format (1.%Y-%m-%d %H:%M:%S 2.%Y/%m/%d %H:%M:%S or 3.input format) :')
 		if(date_format_in == 1):
 			date_format = '%Y-%m-%d %H:%M:%S'
@@ -74,7 +74,7 @@ class qgismakeline:
 						Start_time_count = datetime.datetime.strptime(Time[0],date_format)
 						End_time_count = datetime.datetime.strptime(Time[count-1],date_format)
 						total_time_count = '%s hour %s second'\
-						%(abs((End_time_count-Start_time_count).seconds)/3600,abs((End_time_count-Start_time_count).seconds)%3600)
+						%(abs((End_time_count-Start_time_count).total_seconds())/3600,abs((End_time_count-Start_time_count).seconds)%3600)
 						#
 						line = ogr.Geometry(ogr.wkbLineString)
 						for Long,Lati in zip(Lon[:count],Lat[:count]):
@@ -94,44 +94,46 @@ class qgismakeline:
 					MMSI = MMSI[count:]
 					
 				elif (front_time is not None):
+					
 					t2 = datetime.datetime.strptime(time,date_format)
 					t1 = datetime.datetime.strptime(front_time,date_format)
-					t3=str(t2)
 					t4 = abs((t2-t1).total_seconds())
 					#input cutting time
-					if(t4>cutting_time or idx == MMSILength):
+					if(t4 > int(cutting_time) or idx == MMSILength):
 						i +=1
-						index = Time.index(time)
+						index_c = Time.index(time)
 						#total time counting
 						Start_time_count = datetime.datetime.strptime(Time[0],date_format)
-						End_time_count = datetime.datetime.strptime(Time[index-1],date_format)
+						End_time_count = datetime.datetime.strptime(Time[index_c-1],date_format)
 						total_time_count = '%s hour %s second'\
-						%(abs((End_time_count-Start_time_count).seconds)/3600,abs((End_time_count-Start_time_count).seconds)%3600)
+						%(abs((End_time_count-Start_time_count).total_seconds())/3600,abs((End_time_count-Start_time_count).seconds)%3600)
 						#
-						if(index>1):
+						print('cc')
+						if(index_c>1):
+							print('gg')
 							line = ogr.Geometry(ogr.wkbLineString)
-							for Long,Lati in zip(Lon[:index],Lat[:index]):
+							for Long,Lati in zip(Lon[:index_c],Lat[:index_c]):
 								line.AddPoint(float(Long), float(Lati))
 							feature = ogr.Feature(dstlayer.GetLayerDefn())
 							feature.SetGeometry(line)
 							feature.SetField("MMSI", MMSI[0])
 							feature.SetField("Start_time", Time[0])
 							if (idx == MMSILength):
-								feature.SetField("End_time", Time[index])
+								feature.SetField("End_time", Time[index_c])
 								#print('end')
-								#print('%s point count = %s') %(MMSI[0],index)
+								#print('%s point count = %s') %(MMSI[0],index_c)
 								print('%s get %s line')%(MMSI[0],i)
 							else:
-								feature.SetField("End_time", Time[index-1])
+								feature.SetField("End_time", Time[index_c-1])
 								#print('not end')
-								#print('%s point count = %s') %(MMSI[0],index)
+								#print('%s point count = %s') %(MMSI[0],index_c)
 							feature.SetField("Total_time", total_time_count)
 							dstlayer.CreateFeature(feature)
 							
-						Lon = Lon[index:]
-						Lat = Lat[index:]
-						Time = Time[index:]
-						MMSI = MMSI[index:]
+						Lon = Lon[index_c:]
+						Lat = Lat[index_c:]
+						Time = Time[index_c:]
+						MMSI = MMSI[index_c:]
 				front_time = time
 test = qgismakeline()
 test.select()
