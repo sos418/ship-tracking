@@ -13,7 +13,7 @@ class qgismakeline:
 		spatialref.SetWellKnownGeogCS('WGS84')  # WGS84 aka ESPG:4326
 		#create output Layer
 		driver = ogr.GetDriverByName("ESRI Shapefile")
-		outShapefile = 'C:/Users/USER/Desktop/output2.shp'
+		outShapefile = 'C:/Users/USER/Desktop/output3.shp'
 		# Remove output shapefile if it already exists
 		if os.path.exists(outShapefile):
 			driver.DeleteDataSource(outShapefile)
@@ -38,7 +38,6 @@ class qgismakeline:
 		dstlayer.CreateField(fielddef)
 		
 		#-----------------
-		
 		date_format_in = input('date format (1.%Y-%m-%d %H:%M:%S 2.%Y/%m/%d %H:%M:%S or 3.input format) :')
 		if(date_format_in == 1):
 			date_format = '%Y-%m-%d %H:%M:%S'
@@ -57,6 +56,7 @@ class qgismakeline:
 		MMSILength = len(MMSI)-1
 		print(df.index)
 		i = 0
+		
 		for idx,(mmsi,time) in enumerate(zip(MMSI,Time)):
 			if not(MMSI is None):
 				if (MMSI[0]!=mmsi):
@@ -74,7 +74,7 @@ class qgismakeline:
 						Start_time_count = datetime.datetime.strptime(Time[0],date_format)
 						End_time_count = datetime.datetime.strptime(Time[count-1],date_format)
 						total_time_count = '%s hour %s second'\
-						%(abs((End_time_count-Start_time_count).total_seconds())/3600,abs((End_time_count-Start_time_count).seconds)%3600)
+						%(abs(int((End_time_count-Start_time_count).total_seconds())/3600),abs((End_time_count-Start_time_count).seconds)%3600)
 						#
 						line = ogr.Geometry(ogr.wkbLineString)
 						for Long,Lati in zip(Lon[:count],Lat[:count]):
@@ -94,7 +94,6 @@ class qgismakeline:
 					MMSI = MMSI[count:]
 					
 				elif (front_time is not None):
-					
 					t2 = datetime.datetime.strptime(time,date_format)
 					t1 = datetime.datetime.strptime(front_time,date_format)
 					t4 = abs((t2-t1).total_seconds())
@@ -106,11 +105,9 @@ class qgismakeline:
 						Start_time_count = datetime.datetime.strptime(Time[0],date_format)
 						End_time_count = datetime.datetime.strptime(Time[index_c-1],date_format)
 						total_time_count = '%s hour %s second'\
-						%(abs((End_time_count-Start_time_count).total_seconds())/3600,abs((End_time_count-Start_time_count).seconds)%3600)
+						%(abs(int((End_time_count-Start_time_count).total_seconds())/3600),abs((End_time_count-Start_time_count).seconds)%3600)
 						#
-						print('cc')
 						if(index_c>1):
-							print('gg')
 							line = ogr.Geometry(ogr.wkbLineString)
 							for Long,Lati in zip(Lon[:index_c],Lat[:index_c]):
 								line.AddPoint(float(Long), float(Lati))
@@ -134,6 +131,7 @@ class qgismakeline:
 						Lat = Lat[index_c:]
 						Time = Time[index_c:]
 						MMSI = MMSI[index_c:]
+						
 				front_time = time
 test = qgismakeline()
 test.select()
